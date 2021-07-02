@@ -9,13 +9,13 @@ class DiscordWebhook(dict):
 		:param url: Webhook url (Defaults to one in config.py)
 		:param timeout: Timeout in seconds
 		:keyword content: The message content
-        :keyword username: Webhook username
-        :keyword avatar_url: Webhook avatar
-        :keyword tts: TTS message (bool)
-        :keyword file: File contents
-        :keyword filename: File name
-        :keyword embeds: List of discord embeds
-        :keyword allowed_mentions: List of allowed mentions
+		:keyword username: Webhook username
+		:keyword avatar_url: Webhook avatar
+		:keyword tts: TTS message (bool)
+		:keyword file: File contents
+		:keyword filename: File name
+		:keyword embeds: List of discord embeds
+		:keyword allowed_mentions: List of allowed mentions
 		"""
 		super().__init__()
 
