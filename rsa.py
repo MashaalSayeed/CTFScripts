@@ -25,11 +25,21 @@ def get_private_key(e: int, p: int, q: int):
     return extended_gcd(e, phi(p, q))[1]
 
 def factordb(n: int, json=False):
+    "Queries the factordb api for known factors for the given number"
     req = requests.get('http://factordb.com/api', params={"query": n})
     data = req.json()
     if json:
         return data
     return data.get('factors', [])
+
+def iroot(num: int, root: int) -> tuple[int, bool]:
+    "Returns and integer root of the given number and also whether it is a perfect root or not"
+    u, s = num, num+1
+    while u < s:
+        s = u
+        t = (root-1) * s + num // pow(s, root-1)
+        u = t // root
+    return s, s ** root == num
 
 
 class RSA:
