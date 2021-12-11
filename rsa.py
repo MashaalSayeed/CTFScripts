@@ -1,28 +1,53 @@
 import random
+import requests
 import utils
 
 
+def phi(p: int, q: int):
+    return (p - 1) * (q - 1)
+
+def extended_gcd(num1: int, num2: int):
+    if num1 == 0:
+        return (num2, 0, 1)
+    else:
+        g, y, x = extended_gcd(num2 % num1, num1)
+        return (g, x - (num2 // num1) * y, y)
+
+def encrypt(n: int, e: int, message: str):
+    m = utils.bytes_to_int(message.encode())
+    return pow(m, e, n)
+
+def decrypt(n: int, d: int, c: int):
+    m = pow(c, d, n)
+    return utils.int_to_bytes(m).decode()
+
+def get_private_key(e: int, p: int, q: int):
+    return extended_gcd(e, phi(p, q))[1]
+
+def factordb(n: int, json=False):
+    req = requests.get('http://factordb.com/api', params={"query": n})
+    data = req.json()
+    if json:
+        return data
+    return data.get('factors', [])
+
+
 class RSA:
+    p: int
+    q: int
+    e: int
+    d: int
+
     def generate_keys(self, length = 1024, e = 65537):
-        p = self.generate_prime(length)
-        q = self.generate_prime(length)
+        self.p = self.generate_prime(length)
+        self.q = self.generate_prime(length)
 
         # Get public key
-        self.n = p * q
+        self.n = self.p * self.q
         self.e = e
 
         # Get private key
-        phi = (p - 1) * (q - 1)
-        self.d = self.extended_gcd(e, phi)[1]
-
-
-    def encrypt(self, message: str):
-        m = utils.bytes_to_int(message.encode())
-        return pow(m, self.e, self.n)
-
-    def decrypt(self, c: int):
-        m = pow(c, self.d, self.n)
-        return utils.int_to_bytes(m).decode()
+        self.d = get_private_key(e, self.p, self.q)
 
     def is_prime(self, num: int) -> bool:
         small_primes = (
@@ -47,7 +72,7 @@ class RSA:
             r += 1
 
         # Do trials k times
-        for trials in range(k):
+        for _ in range(k):
             # pick a random integer a in the range [2, n − 2]
             # Compute: x = (a^d) % n
             # If x == 1 or x == n-1, return true.
@@ -73,20 +98,13 @@ class RSA:
         
         return num
 
-    def extended_gcd(self, num1, num2):
-        if num1 == 0:
-            return (num2, 0, 1)
-        else:
-            g, y, x = self.extended_gcd(num2 % num1, num1)
-            return (g, x - (num2 // num1) * y, y)
-
 
 if __name__ == "__main__":
     r = RSA()
     r.generate_keys()
 
     message = "Hello World" * 23
-    c = r.encrypt(message)
-    m = r.decrypt(c)
+    c = encrypt(message)
+    m = decrypt(c)
 
     assert m == message
